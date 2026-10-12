@@ -8,7 +8,7 @@ from scipy.ndimage import median_filter
 
 SAMPLE_RATE = 100  # Hz
 WINSEC = 10
-FEATURE_VERSION = 1  # bump when windowing or features change; it is part of the cache file name
+FEATURE_VERSION = 2  # bump when windowing or features change; it is part of the cache file name
 
 
 def load_participant(path):
@@ -22,11 +22,12 @@ def make_windows(time, xyz, annotation, class_of, winsec=WINSEC, rate=SAMPLE_RAT
 
     time: sorted datetime64 (N,); xyz: float (N, 3); annotation: int (N,) annotation id per sample,
     -1 = unlabelled; class_of: {scheme: int (A,)} class code of each annotation id.
-    Rule: bins of `winsec` from the first sample; keep a bin if it has exactly winsec*rate samples, no NaN,
-    and "unlabelled" is not its single most frequent annotation; its label is the most frequent class
-    among the labelled samples (ties go to the lowest code). This is prepare_data.py plus the
-    unlabelled-majority drop that reproduces the paper's window counts.
-    Returns X (W, n, 3), window_start (W,), {scheme: label (W,)}, drop counts.
+    Rule: bins of `winsec` from the first sample; keep a bin if it has exactly winsec*rate samples and no NaN.
+    Its label is the most frequent class among its labelled samples (ties go to the lowest code), or -1 if
+    "unlabelled" is its single most frequent annotation. Unlabelled windows stay so that a sequence model sees
+    the whole timeline; the labelled ones are prepare_data.py's windows minus the unlabelled-majority ones,
+    which reproduces the paper's window counts.
+    Returns X (W, n, 3), window_start (W,), {scheme: label (W,)}, bin counts.
     """
     n = winsec * rate
     bins = (time - time[0]) // np.timedelta64(winsec, "s")
@@ -37,14 +38,17 @@ def make_windows(time, xyz, annotation, class_of, winsec=WINSEC, rate=SAMPLE_RAT
     X = xyz[idx]
     has_nan = np.isnan(X).any(axis=(1, 2))
 
-    n_annotations = len(next(iter(class_of.values())))
-    votes = np.stack([(annotation[idx] == a).sum(axis=1) for a in range(n_annotations)], axis=1)
-    labelled = votes.max(axis=1) >= n - votes.sum(axis=1)
+    # Samples per bin for each annotation, in one pass; column 0 counts the unlabelled samples.
+    k = len(next(iter(class_of.values()))) + 1
+    cell = np.arange(len(idx))[:, None] * k + annotation[idx] + 1
+    counts = np.bincount(cell.ravel(), minlength=len(idx) * k).reshape(-1, k)
+    votes = counts[:, 1:]
+    labelled = votes.max(axis=1) >= counts[:, 0]
     labels = {scheme: (votes @ np.eye(c.max() + 1, dtype=int)[c]).argmax(axis=1) for scheme, c in class_of.items()}
-    keep = ~has_nan & labelled
-    dropped = {"n_bins": len(count), "n_short": int((~full).sum()), "n_nan": int(has_nan.sum()),
-               "n_unlabelled": int((~has_nan & ~labelled).sum()), "n_kept": int(keep.sum())}
-    return X[keep], time[start[full]][keep], {s: y[keep] for s, y in labels.items()}, dropped
+    keep = ~has_nan
+    counts = {"n_bins": len(count), "n_short": int((~full).sum()), "n_nan": int(has_nan.sum()),
+              "n_unlabelled": int((keep & ~labelled).sum()), "n_labelled": int((keep & labelled).sum())}
+    return X[keep], time[start[full]][keep], {s: np.where(labelled, y, -1)[keep] for s, y in labels.items()}, counts
 
 
 def _first_peak(u, rate):
@@ -100,7 +104,7 @@ def extract_features(X, rate=SAMPLE_RATE):
         p = np.take_along_axis(peak_power, top[:, k : k + 1], axis=1)[:, 0]
         f[f"f{k + 1}"], f[f"p{k + 1}"] = np.where(p > 0, freqs[top[:, k]], 0), p
 
-    # Welch power at 0, 1, ..., 5 Hz.
+    # Welch power at 0, 1, ..., 5 Hz. fft0 is near zero because each segment has its mean removed; it adds nothing.
     _, Pw = signal.welch(v, fs=rate, nperseg=rate, noverlap=rate // 2, detrend="constant",
                          scaling="density", average="median", axis=1)
     for k in range(6):
