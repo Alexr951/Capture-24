@@ -17,20 +17,20 @@ def load_participant(path):
                        dtype={"x": "f4", "y": "f4", "z": "f4", "annotation": "category"})
 
 
-def make_windows(time, xyz, annotation, class_of, winsec=WINSEC, rate=SAMPLE_RATE):
+def make_windows(time, xyz, annotation, class_of):
     """Cut one recording into non-overlapping windows.
 
     time: sorted datetime64 (N,); xyz: float (N, 3); annotation: int (N,) annotation id per sample,
     -1 = unlabelled; class_of: {scheme: int (A,)} class code of each annotation id.
-    Rule: bins of `winsec` from the first sample; keep a bin if it has exactly winsec*rate samples and no NaN.
+    Rule: bins of WINSEC from the first sample; keep a bin if it has exactly WINSEC * SAMPLE_RATE samples and no NaN.
     Its label is the most frequent class among its labelled samples (ties go to the lowest code), or -1 if
     "unlabelled" is its single most frequent annotation. Unlabelled windows stay so that a sequence model sees
     the whole timeline; the labelled ones are prepare_data.py's windows minus the unlabelled-majority ones,
     which reproduces the paper's window counts.
     Returns X (W, n, 3), window_start (W,), {scheme: label (W,)}, bin counts.
     """
-    n = winsec * rate
-    bins = (time - time[0]) // np.timedelta64(winsec, "s")
+    n = WINSEC * SAMPLE_RATE
+    bins = (time - time[0]) // np.timedelta64(WINSEC, "s")
     assert (np.diff(bins) >= 0).all(), "timestamps must be sorted"
     _, start, count = np.unique(bins, return_index=True, return_counts=True)
     full = count == n
@@ -51,16 +51,23 @@ def make_windows(time, xyz, annotation, class_of, winsec=WINSEC, rate=SAMPLE_RAT
     return X[keep], time[start[full]][keep], {s: np.where(labelled, y, -1)[keep] for s, y in labels.items()}, counts
 
 
-def _first_peak(u, rate):
+def cut_windows(time, xyz):
+    """make_windows without labels, which do not change which windows are kept: X, window_start, bin counts."""
+    X, start, _, counts = make_windows(time, xyz, np.full(len(time), -1), {"none": np.zeros(1, dtype=int)})
+    return X, start, counts
+
+
+def _first_peak(u):
     """Height and location (s) of the first peak of u with prominence >= 0.1, else zeros."""
     peaks, _ = signal.find_peaks(u, prominence=0.1)
-    return (u[peaks[0]], peaks[0] / rate) if len(peaks) else (0.0, 0.0)
+    return (u[peaks[0]], peaks[0] / SAMPLE_RATE) if len(peaks) else (0.0, 0.0)
 
 
-def extract_features(X, rate=SAMPLE_RATE):
+def extract_features(X):
     """X: (W, n, 3) windows in g -> DataFrame (W, 39). Vectorised across windows except peak finding."""
     X = np.asarray(X, dtype=np.float64)
     W, n, _ = X.shape
+    rate = SAMPLE_RATE
     f = {}
 
     # Vector magnitude, as in the reference: median filter, remove 1 g, clip.
@@ -104,7 +111,8 @@ def extract_features(X, rate=SAMPLE_RATE):
         p = np.take_along_axis(peak_power, top[:, k : k + 1], axis=1)[:, 0]
         f[f"f{k + 1}"], f[f"p{k + 1}"] = np.where(p > 0, freqs[top[:, k]], 0), p
 
-    # Welch power at 0, 1, ..., 5 Hz. fft0 is near zero because each segment has its mean removed; it adds nothing.
+    # Welch power at 0, 1, ..., 5 Hz. fft0 is near zero because each segment has its mean removed; it stays so that
+    # the cached 39 features keep their layout.
     _, Pw = signal.welch(v, fs=rate, nperseg=rate, noverlap=rate // 2, detrend="constant",
                          scaling="density", average="median", axis=1)
     for k in range(6):
@@ -116,8 +124,8 @@ def extract_features(X, rate=SAMPLE_RATE):
                  "npeaks", "peaks_avg_promin", "peaks_min_promin", "peaks_max_promin"]
     peak = np.zeros((W, len(peak_cols)))
     for w in range(W):
-        peak[w, 0:2] = _first_peak(acf[w], rate)
-        lo, loc = _first_peak(-acf[w], rate)
+        peak[w, 0:2] = _first_peak(acf[w])
+        lo, loc = _first_peak(-acf[w])
         peak[w, 2:4] = -lo, loc
         prom = signal.find_peaks(u[w], distance=0.2 * rate, prominence=0.25)[1]["prominences"]
         if len(prom):

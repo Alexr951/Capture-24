@@ -459,7 +459,7 @@
         "macro_f1": 0.4947476145524153,
         "kappa": 0.706443815600087
       },
-      "the paper's emission matrix": {
+      "the paper's emission matrix (estimated)": {
         "macro_f1": 0.5209851226052586,
         "kappa": 0.7066373908535967
       },
@@ -501,7 +501,7 @@
         "macro_f1": -0.026969149313808637,
         "kappa": -0.0019988908844963183
       },
-      "the paper's emission matrix": {
+      "the paper's emission matrix (estimated)": {
         "macro_f1": -0.0007316412609652878,
         "kappa": -0.0018053156309865593
       },
@@ -543,7 +543,7 @@
         "macro_f1": 0.03308793831179417,
         "kappa": 0.023028583155719467
       },
-      "the paper's emission matrix": {
+      "the paper's emission matrix (estimated)": {
         "macro_f1": 0.03409004010347951,
         "kappa": 0.021624584749432494
       },
