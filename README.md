@@ -24,7 +24,7 @@ Held-out participants, with 95% bootstrap intervals over participants. Macro-F1 
 - The encoder is [`ssl-wearables`](https://github.com/OxWearables/ssl-wearables) harnet10 (Yuan et al., 2024), pretrained by the dataset's authors without labels on 700,000 person-days of UK Biobank data. It never saw CAPTURE-24. The paper's CNN was trained from scratch, so part of the gain over it is pretraining.
 - An ablation in cross-validation separates the two parts: the encoder adds 0.034 to 0.070 κ over hand-made features, and context adds 0.020 to 0.056. Context also makes the HMM unnecessary.
 - Part of the gap to B is the decision rule. Context keeps the class frequencies in its output and the HMM models divide them out; with every model at its best rule, Context's cross-validation gain over B is 0.064 κ instead of 0.105.
-- Macro-F1 gains are smaller and less certain. Manual work and mixed activity stay at F1 0.3 or below.
+- Macro-F1 gains are smaller and less certain. Manual work and mixed activity stay at F1 0.3 or below in cross-validation.
 
 ## Notebooks
 
@@ -36,7 +36,7 @@ Held-out participants, with 95% bootstrap intervals over participants. Macro-F1 
 
 [`capture24_new_model.ipynb`](capture24_new_model.ipynb), part 2:
 
-- Most of B's errors are whole bouts of a few minutes; label timing explains at most 0.03 κ.
+- Two thirds of B's errors are more than a minute from any label change; label timing explains at most about 0.03 κ.
 - Annotators leave an unlabelled gap at almost every change of activity (46 of 609,580 adjacent labelled pairs differ), so the HMM learns "almost never switch".
 - The pretrained encoder, fine-tuned and frozen, the context model, held-out results, and the ablation above.
 
@@ -64,7 +64,7 @@ Tested with Python 3.13, 16 GB of memory, 8 cores and an RTX 2070 SUPER.
 
 1. Download `capture24.zip` (6.9 GB) from <https://doi.org/10.5287/bodleian:NGx0JOMP5> into `data/`.
 2. `pip install -r requirements.txt` and `python -m ipykernel install --user --name capture24`. Versions are pinned because the paper's pipeline depends on how imbalanced-learn 0.13.0 and scikit-learn 1.6.1 compute out-of-bag output.
-3. Part 1 (CPU): `jupyter nbconvert --execute --to notebook --inplace capture24_har.ipynb`. About 11 min with caches; the first run adds about 27 min.
+3. Part 1 (CPU): `jupyter nbconvert --execute --to notebook --inplace capture24_har.ipynb`. About 7 min with caches; the first run adds about 27 min.
 4. Part 2 (GPU): the same command on `capture24_new_model.ipynb`. Fits are cached in `data/fits/`; with the cache it takes about 10 min, and from scratch it trains 16 fine-tuned encoders (about 9 min each) and 61 recurrent networks (3-5 min each).
 5. From the repository root, after part 2: `python scripts/train_context.py` refits the shipped model.
 
