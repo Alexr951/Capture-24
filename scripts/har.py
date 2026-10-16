@@ -1,5 +1,4 @@
 # Shared by both notebooks and predict.py: folds, the forest, the HMM, metrics, bootstraps and the activity band plot.
-# Tests are in tests/test_har.py.
 from itertools import pairwise
 
 import matplotlib.pyplot as plt

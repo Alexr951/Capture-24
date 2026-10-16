@@ -1,9 +1,9 @@
-"""Fit the Context model on P001-P100 and save it for predict.py:  python train_context.py
+"""Fit the Context model on P001-P100 and save it for predict.py:  python scripts/train_context.py
 
 The configuration scored on the held-out participants in capture24_new_model.ipynb: the frozen encoder, chunks of
 64 windows, seed 42, early stopping on a fifth of the training participants. The scored fit's weights were not kept,
 so this refits it and compares the refit's top class with the scored fit's on the held-out windows, without labels.
-Needs the caches that notebook builds in data/.
+Needs the caches that notebook builds in data/; run from the repository root.
 """
 from pathlib import Path
 

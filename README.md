@@ -36,7 +36,7 @@ Each model was scored at the decision rule the protocol fixed for it: Context ke
 
 The encoder and the context both matter, and they overlap. In cross-validation, with each model at its best rule for κ, the encoder's output beats B's 39 hand-made features by 0.070 under the same single-window network and HMM and by 0.034 under the same context network; context adds 0.056 on the hand-made features and 0.020 on the encoder, and needs no HMM. With the one fine-tuning recipe tried, the frozen encoder is 0.021 above the fine-tuned one at each model's best rule. No model gets much past macro-F1 0.60.
 
-**2. A fact about the labels.** Annotators leave an unlabelled gap at almost every change of activity: of 609,580 adjacent pairs of labelled windows, 46 are two different activities. So the labels cannot say how often people switch activity. The HMM's transition matrix comes out close to "never switch", with a cost set by a numerical floor and not by data. The HMM appears to act as a flicker filter, and the recurrent network makes it redundant.
+**2. A fact about the labels.** Annotators leave an unlabelled gap at almost every change of activity: of 609,580 adjacent pairs of labelled windows in P001–P100, 46 are two different activities. So the labels cannot say how often people switch activity. The HMM's transition matrix comes out close to "never switch", with a cost set by a numerical floor and not by data. The HMM appears to act as a flicker filter, and the recurrent network makes it redundant.
 
 **3. Unsolved.** Rare activities and unusual days. Manual work and mixed activity are at F1 0.3 or below in cross-validation. One participant who spent ten hours in a vehicle scores κ 0.32 to 0.39 whatever the model.
 
@@ -68,10 +68,10 @@ Best κ in cross-validation: Context 0.814, B 0.749; the notebook has the rest.
 ## Try it
 
 ```
-python predict.py recording.csv.gz --out results/
+python scripts/predict.py recording.csv.gz --out results/
 ```
 
-writes a timeline CSV and a picture of the day from a raw recording (100 Hz, in g, columns `time, x, y, z`), using the Context model in `models/context_v1.pt`. `--rule balanced` trades some agreement for more of the rare activities. [`MODEL_CARD.md`](MODEL_CARD.md) says what input it was validated on and where it fails.
+writes a timeline CSV and a picture of the day from a raw recording (100 Hz, in g, columns `time, x, y, z`), using the Context model in `models/context_v1.pt`. `--rule balanced` trades some agreement for more of the rare activities. It was validated only on CAPTURE-24's input: an Axivity AX3 on the wrist, ±8 g, adults around Oxford; it stops if the samples are not 10 ms apart. The model file is stored with Git LFS, so clone with Git LFS installed (or run `git lfs pull`). The first run downloads the encoder from its authors.
 
 ## What keeps it honest
 
@@ -80,7 +80,7 @@ writes a timeline CSV and a picture of the day from a raw recording (100 Hz, in 
 - Models decode each full recording, including unlabelled stretches, and are scored on labelled windows only.
 - Held-out intervals resample participants, not windows, and comparisons between models are paired by participant.
 - For each new model the settings, the candidates and the selection rule were written down before any score, and the held-out participants were scored once.
-- The shared code (folds, HMM, metrics, bootstraps) is in `har.py` with tests in `tests/`, and both notebooks check that B reproduces the same scores.
+- The shared code (folds, HMM, metrics, bootstraps) is in `scripts/har.py`, and both notebooks check that B reproduces the same scores.
 
 ## Limitations
 
@@ -99,29 +99,20 @@ writes a timeline CSV and a picture of the day from a raw recording (100 Hz, in 
 Tested with Python 3.13 on a machine with 16 GB of memory, 8 logical cores and an RTX 2070 SUPER (8 GB).
 
 1. Download `capture24.zip` (6.9 GB) from <https://doi.org/10.5287/bodleian:NGx0JOMP5> into `data/`.
-2. Part 1, CPU only:
+2. Install and register the kernel both notebooks ask for:
    ```
    pip install -r requirements.txt
    python -m ipykernel install --user --name capture24
-   jupyter nbconvert --execute --to notebook --inplace capture24_har.ipynb
    ```
-   The versions are pinned on purpose: the rerun of the paper's pipeline relies on how imbalanced-learn 0.13.0 and scikit-learn 1.6.1 compute out-of-bag output. Check: the window-count table near the top should read 922,199 in both columns. A run takes about 11 min once the caches in `data/` exist; the first run also builds the feature cache (9 min) and the rerun of the paper's pipeline (18 min).
-3. Part 2, with a GPU:
-   ```
-   pip install -r requirements-gpu.txt
-   python -m ipykernel install --user --name capture24
-   jupyter nbconvert --execute --to notebook --inplace capture24_new_model.ipynb
-   ```
-   `requirements-gpu.txt` includes `requirements.txt` and adds PyTorch 2.14.1 with CUDA 12.6. Both notebooks ask for the `capture24` kernel, so register it from that environment. Every fit is cached in `data/fits/` under a name that ends in a hash of its settings, so changing a setting refits rather than reusing a stale result. The first run resamples the data to 30 Hz, computes the encoder's output for every window and fits 21 fine-tuned encoders (about 9 min each) and 66 recurrent networks (3–5 min each). After that a run takes about 15 min.
-4. The command-line tool: `python train_context.py` fits and saves the Context model (a few minutes), then `python predict.py`.
-5. Tests: `pytest`, on synthetic data.
+   The versions are pinned on purpose: the rerun of the paper's pipeline relies on how imbalanced-learn 0.13.0 and scikit-learn 1.6.1 compute out-of-bag output. PyTorch 2.14.1 comes with CUDA 12.6.
+3. Part 1, CPU only: `jupyter nbconvert --execute --to notebook --inplace capture24_har.ipynb`. Check: the window-count table near the top should read 922,199 in both columns. A run takes about 11 min once the caches in `data/` exist; the first run also builds the feature cache (9 min) and the rerun of the paper's pipeline (18 min).
+4. Part 2, with a GPU: `jupyter nbconvert --execute --to notebook --inplace capture24_new_model.ipynb`. Every fit is cached in `data/fits/` under a name that ends in a hash of its settings, so changing a setting refits rather than reusing a stale result. The first run resamples the data to 30 Hz, computes the encoder's output for every window and fits 21 fine-tuned encoders (about 9 min each) and 66 recurrent networks (3–5 min each). After that a run takes about 15 min.
+5. The command-line tool: `python scripts/train_context.py` refits and saves the Context model (a few minutes), then `python scripts/predict.py`.
 
 ## Files
 
 - `capture24_har.ipynb`, `capture24_new_model.ipynb`: the two notebooks.
-- `features.py` (windows and features), `har.py` (folds, forest, HMM, metrics, bootstraps), `deep.py` (encoder, fine-tuning, context model).
-- `train_context.py`, `predict.py`, `models/context_v1.pt`, `MODEL_CARD.md`: the command-line tool.
-- `docs/writeup.md`: the project as a short read.
+- `scripts/`: `features.py` (windows and features), `har.py` (folds, forest, HMM, metrics, bootstraps), `deep.py` (encoder, fine-tuning, context model), and the command-line tool, `train_context.py` and `predict.py`, which uses `models/context_v1.pt`.
 - `outputs/results.json`, `outputs/results_new_model.json`: every score, for part 1 and part 2.
 - `outputs/holdout_predictions.csv`, `outputs/holdout_proba.npy`: B's predictions for every labelled held-out window. `y_pred` is the most likely sequence; the probability columns are the HMM's per-window posterior, so their largest value can differ from `y_pred` (it agrees for 98.7% of windows).
 

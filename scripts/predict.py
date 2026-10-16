@@ -1,9 +1,9 @@
 """Activity timeline from a raw wrist-accelerometer recording.
 
-    python predict.py recording.csv.gz --out results/
+    python scripts/predict.py recording.csv.gz --out results/
 
 Input: a CSV (gzipped or not) with columns time, x, y, z: 100 Hz, in g, from a wrist-worn Axivity AX3, the format of
-CAPTURE-24's participant files. Anything else is untested; see MODEL_CARD.md.
+CAPTURE-24's participant files. Anything else is untested.
 Output: <name>_timeline.csv (one row per 10 s window: start, activity, a probability per activity) and
 <name>_timeline.png (the activities as a coloured band over time).
 """
@@ -24,7 +24,7 @@ import deep
 import features as F
 import har
 
-MODEL = Path(__file__).parent / "models" / "context_v1.pt"
+MODEL = Path(__file__).parent.parent / "models" / "context_v1.pt"
 # How much of the training class frequencies to remove from the model's output (prior ** -alpha), with the
 # 5-fold cross-validation scores of each rule on CAPTURE-24 (capture24_new_model.ipynb).
 RULES = {"agreement": 0.0,   # kappa 0.814, macro-F1 0.580; the rule scored on the held-out participants (kappa 0.790)
@@ -82,8 +82,8 @@ def main():
                         help="agreement (default): the scored model, CV kappa 0.814 and macro-F1 0.580. "
                              "balanced: finds more rare activities, CV kappa 0.790 and macro-F1 0.593.")
     args = parser.parse_args()
-    if not MODEL.exists():
-        sys.exit(f"{MODEL} is missing: run train_context.py first")
+    if not MODEL.exists() or MODEL.read_bytes().startswith(b"version https://git-lfs"):
+        sys.exit(f"{MODEL} is missing or a Git LFS pointer: run git lfs pull, or scripts/train_context.py")
     har.set_style()
     start, proba, classes = predict(*load_recording(args.recording), RULES[args.rule])
     name = args.recording.name.split(".")[0]
