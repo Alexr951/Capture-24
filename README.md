@@ -1,69 +1,54 @@
 # Recognising daily activities from a wrist sensor
 
-Reproduces the CAPTURE-24 random forest + HMM benchmark from the authors' code (κ 0.660 against 0.637 published), measures two evaluation pitfalls and one labelling artefact, and reaches κ 0.790 on held-out participants with a frozen self-supervised encoder (pretrained by the data's authors on UK Biobank, never on CAPTURE-24) and a small recurrent network (+0.064 κ over our random forest + HMM in cross-validation, with each model at its best decision rule).
+Human activity recognition on [CAPTURE-24](https://doi.org/10.5287/bodleian:NGx0JOMP5): 151 people who wore a wrist accelerometer for a day, labelled with 10 activities (sleep, sitting, standing, household chores, manual work, walking, mixed activity, vehicle, sports, bicycling) from camera photos taken every 20 to 40 seconds. The task is to label every 10 s window. The last 51 participants are held out, as in the dataset paper ([Chan et al., 2024](https://doi.org/10.1038/s41597-024-03960-3)).
 
-A wrist accelerometer records 24 hours of movement. Can we tell what its wearer was doing in every 10 seconds? It is hard because the recordings come from people's normal days, not scripted lab sessions, and the labels come from camera photos taken every 20 to 40 seconds.
+I first reproduced the paper's random forest + HMM baseline, then built a model that uses a self-supervised encoder and reads about 10 minutes of context at a time. It reaches κ 0.790 on the held-out participants, against 0.735 for the paper's best model.
 
-The data is [CAPTURE-24](https://doi.org/10.5287/bodleian:NGx0JOMP5): 151 people wearing a wrist sensor for a day each, labelled with 10 activities (sleep, sitting, standing, household chores, manual work, walking, mixed activity, vehicle, sports, bicycling). The last 51 participants are held out, as in the paper ([Chan et al., 2024](https://doi.org/10.1038/s41597-024-03960-3)).
+![Camera labels, a random forest (A) and the forest smoothed by an HMM (B) over six hours of one participant](outputs/bands.png)
 
-Six hours of one held-out participant: the camera labels, a random forest that judges each 10 s window alone (A), and the same forest smoothed over time by a hidden Markov model (B).
+## Results
 
-![Camera labels, model A and model B over six hours](outputs/bands.png)
+Held-out participants, with 95% bootstrap intervals over participants. Macro-F1 averages F1 over the 10 activities, so rare ones count as much as sleep; κ is agreement beyond chance.
 
-## Three findings
-
-**1. Result.** The best model here is a pretrained encoder, used frozen, with a small recurrent network that reads consecutive windows ("Context").
-
-Macro-F1 is the average score per activity, so rare activities count as much as sleep. κ is agreement with the labels beyond what chance would give.
-
-| Held-out participants [95% interval] | Macro-F1 | κ |
+| Model | Macro-F1 | κ |
 |---|---|---|
-| The paper's random forest + HMM, rerun here | 0.535 [0.490, 0.566] | 0.660 [0.630, 0.692] |
-| B: random forest + HMM | 0.566 [0.524, 0.595] | 0.690 [0.653, 0.725] |
-| Deep + HMM: the encoder fine-tuned, + HMM | 0.619 [0.557, 0.659] | 0.742 [0.702, 0.778] |
-| Context: the encoder frozen, + recurrent network | 0.642 [0.577, 0.677] | 0.790 [0.758, 0.819] |
+| Paper's random forest + HMM, rerun here | 0.535 [0.490, 0.566] | 0.660 [0.630, 0.692] |
+| B: my random forest + HMM | 0.566 [0.524, 0.595] | 0.690 [0.653, 0.725] |
+| Deep + HMM: encoder fine-tuned, + HMM | 0.619 [0.557, 0.659] | 0.742 [0.702, 0.778] |
+| **Context: encoder frozen, + bidirectional GRU** | **0.642 [0.577, 0.677]** | **0.790 [0.758, 0.819]** |
 | Context minus B, paired by participant | +0.076 [0.021, 0.111] | +0.100 [0.076, 0.124] |
-| The paper's CNN + HMM, trained from scratch, as published (not paired) | 0.576 | 0.735 |
-
-| Context's κ gain, cross-validation | Over B | Over Deep + HMM |
-|---|---|---|
-| At the decision rules used on the held-out participants | +0.105 | +0.072 |
-| With each model at its best rule for κ | +0.064 | +0.041 |
-
-Each model was scored at the decision rule the protocol fixed for it: Context keeps the class frequencies in its output, the HMM models have them divided out. Putting each model at its best rule shrinks the gains by about 40%, so read +0.100 as an upper figure.
+| Paper's CNN + HMM, as published (trained from scratch) | 0.576 | 0.735 |
 
 ![Held-out scores](outputs/results_new_model.png)
 
-The encoder and the context both matter, and they overlap. In cross-validation, with each model at its best rule for κ, the encoder's output beats B's 39 hand-made features by 0.070 under the same single-window network and HMM and by 0.034 under the same context network; context adds 0.056 on the hand-made features and 0.020 on the encoder, and needs no HMM. With the one fine-tuning recipe tried, the single-window network on the frozen encoder is 0.021 above the fine-tuned encoder at each model's best rule. No model gets much past macro-F1 0.60.
+- The encoder is [`ssl-wearables`](https://github.com/OxWearables/ssl-wearables) harnet10 (Yuan et al., 2024), pretrained by the dataset's authors without labels on 700,000 person-days of UK Biobank data. It never saw CAPTURE-24. The paper's CNN was trained from scratch, so part of the gain over it is pretraining.
+- An ablation in cross-validation separates the two parts: the encoder adds 0.034 to 0.070 κ over hand-made features, and context adds 0.020 to 0.056. Context also makes the HMM unnecessary.
+- Part of the gap to B is the decision rule. Context keeps the class frequencies in its output and the HMM models divide them out; with every model at its best rule, Context's cross-validation gain over B is 0.064 κ instead of 0.105.
+- Macro-F1 gains are smaller and less certain. Manual work and mixed activity stay at F1 0.3 or below.
 
-**2. A fact about the labels.** Annotators leave an unlabelled gap at almost every change of activity: of 609,580 adjacent pairs of labelled windows in P001-P100, 46 are two different activities. So the labels cannot say how often people switch activity. The HMM's transition matrix comes out close to "never switch", and the cost of a switch is set by a numerical floor (the sweeps are in commit `2e6492d`). The HMM appears to act as a flicker filter, and the recurrent network makes it redundant.
+## Notebooks
 
-**3. Unsolved.** Rare activities and unusual days. Manual work and mixed activity are at F1 0.3 or below in cross-validation. One participant who spent ten hours in a vehicle scores κ 0.36 to 0.39 with B, the fine-tuned model and Context (commit `2e6492d`).
+[`capture24_har.ipynb`](capture24_har.ipynb), part 1:
 
-**How to read the scores.** Every score is on labelled windows, and labelled windows almost never sit on a change of activity, so the scores describe the inside of bouts; on continuously labelled data they would be lower. Cross-validation ± figures are over five folds that share most of their training participants, so they understate the uncertainty; the paired bootstraps over held-out participants are the inference to lean on.
+- Window counts match the paper exactly (922,199), and the paper's pipeline, rerun from its code, scores κ 0.660 against 0.637 published.
+- B adds about 0.03 κ over that rerun on the held-out participants (paired interval 0.001 to 0.058).
+- Two pitfalls, measured. Splitting sequences where annotation stops leaks 0.02 macro-F1. And with too few trees, imblearn's balanced forest gives 29% of sleep and sitting windows no out-of-bag output at all; they become rows of zeros, which costs an HMM fitted on that output 0.075 κ.
 
-## The work, in order
+[`capture24_new_model.ipynb`](capture24_new_model.ipynb), part 2:
 
-Part 1 is [`capture24_har.ipynb`](capture24_har.ipynb); part 2 is [`capture24_new_model.ipynb`](capture24_new_model.ipynb).
+- Most of B's errors are whole bouts of a few minutes; label timing explains at most 0.03 κ.
+- Annotators leave an unlabelled gap at almost every change of activity (46 of 609,580 adjacent labelled pairs differ), so the HMM learns "almost never switch".
+- The pretrained encoder, fine-tuned and frozen, the context model, held-out results, and the ablation above.
 
-**Reproduction (part 1).** Window counts match the paper's exactly (922,199). The paper's random forest + HMM, rerun from the authors' code, scores κ 0.660 on the held-out participants against 0.637 published, so it is a fair baseline.
+Cross-validation is grouped by participant. Each new model's settings and selection rule were written down before any of its scores were seen, and the held-out set was scored once per model. Some analyses cut from part 2 (per-participant κ, HMM floor and switching-rate sweeps, fine-tuning variants, a drift check) are in commit `2e6492d`.
 
-**Two pitfalls, measured (part 1).**
+## Limitations
 
-- Splitting sequences where annotation stops tells the HMM where activities begin and end. It adds 0.02 macro-F1 that a deployed model would not get.
-- If you fit anything on the out-of-bag output of imblearn's balanced forest, check coverage. A majority-class window is out-of-bag for about trees × (smallest class ÷ its class) × 0.37 trees. Here that ratio is about 1/85, so with 300 trees 29% of sleep and sitting windows get none and are averaged in as rows of zeros. An HMM fitted on that output loses 0.075 κ. imblearn warns, but not how many windows are affected or that their rows become zeros.
-
-**B (part 1).** A balanced random forest on 39 features per window, with an HMM over its probabilities. In 5-fold cross-validation B is 0.039 κ above the rerun of the paper's pipeline (standard error 0.013) and level on macro-F1. On the held-out participants the paired difference is +0.029 κ (0.001 to 0.058): a small gain and no more.
-
-**Where B's errors are (part 2).** Uncertain label timing explains at most 0.03 κ, partly because annotators had already cut the uncertain moments out as gaps; two thirds of the errors are more than a minute from any label change. That led to the label-gap finding above, and to a model that reads minutes at a time. (Sweeps of the HMM's floor and switching rate, which show the smoother is not the bottleneck, are in commit `2e6492d`.)
-
-**A pretrained encoder (part 2).** The authors' self-supervised encoder, [`ssl-wearables`](https://github.com/OxWearables/ssl-wearables) (Yuan et al., 2024), fine-tuned on the same folds with B's HMM, beats B on both metrics and matches the paper's deep model. The encoder was pretrained without labels on 700,000 person-days of UK Biobank data and never saw CAPTURE-24. Its authors benchmarked it on a 4-class version of CAPTURE-24 (fine-tuned F1 0.726, κ 0.737), which is not comparable to the 10-class task here.
-
-**Context, the decision rule, and what the encoder is worth (part 2).** A recurrent network over the frozen encoder's output for consecutive windows reads minutes at a time. Each model's scores depend on how much of the class frequencies its decision rule keeps: keeping them favours common activities and κ, removing them favours rare activities and macro-F1 (with them kept, B never predicts manual work at all). The figure shows every model along that whole trade-off, on cross-validation, including the same two networks on B's hand-made features.
-
-![Macro-F1 against κ for each model as the decision rule changes](outputs/decision_rule.png)
-
-Best κ in cross-validation: Context 0.814, B 0.749; the notebook has the rest.
+- The held-out participants have been scored five times over the project (B twice, the rerun, Deep + HMM, Context). Everything in between was chosen on cross-validation.
+- Held-out macro-F1 leans on activities few participants did (8 did sports). The cross-validation figures, 0.52 for B and 0.58 for Context, are safer to quote.
+- Labelled windows almost never sit on a change of activity, so every score describes the inside of bouts.
+- One fine-tuning recipe was tried, one seed was scored on the held-out set, and all the data is from one UK cohort wearing one device.
+- The context model reads whole recordings in both directions, so it is offline only.
 
 ## Try it
 
@@ -71,54 +56,20 @@ Best κ in cross-validation: Context 0.814, B 0.749; the notebook has the rest.
 python scripts/predict.py recording.csv.gz --out results/
 ```
 
-writes a timeline CSV and a picture of the day from a raw recording (100 Hz, in g, columns `time, x, y, z`), using the Context model in `models/context_v1.pt`. `--rule balanced` trades some agreement for more of the rare activities. It was validated only on CAPTURE-24's input: an Axivity AX3 on the wrist, ±8 g, adults around Oxford; it stops if the samples are not 10 ms apart. The model file is stored with Git LFS, so clone with Git LFS installed (or run `git lfs pull`). The first run downloads the encoder from its authors.
-
-## What keeps it honest
-
-- Cross-validation is grouped by participant, and everything fitted (forest, HMM, networks, early stopping) uses training participants only.
-- The rerun of the paper's pipeline was configured from the paper's code before any score was seen, and run once.
-- Models decode each full recording, including unlabelled stretches, and are scored on labelled windows only.
-- Held-out intervals resample participants, not windows, and comparisons between models are paired by participant.
-- For each new model the settings, the candidates and the selection rule were written down before any score, and the held-out participants were scored once.
-- The shared code (folds, HMM, metrics, bootstraps) is in `scripts/har.py`, and both notebooks check that B reproduces the same scores.
-
-## Limitations
-
-- **The held-out participants have been used five times:** B twice (once with an earlier version), the paper's rerun, Deep + HMM and Context. Every choice in between was made on cross-validation, and the models compared afterwards (the single-window control, the hand-made-feature networks, the decision-rule curves) were scored in cross-validation only.
-- **Selection on the same folds.** B's design, the fine-tuned combination and the context candidate were chosen on the folds whose scores are reported, which favours them slightly there.
-- **Held-out macro-F1 leans on a few activities** that only some of the 51 participants did (8 did sports). The cross-validation figures, 0.52 for B and 0.58 for Context, are the safer ones to quote (a mean over folds, where the held-out figure is pooled).
-- **Label noise.** Labels come from camera frames 20 to 40 s apart plus sleep diaries, and some classes overlap: manual work with household chores, mixed activity with walking.
-- **Not the paper's exact run.** The rerun uses this project's feature code (30 of the paper's 32 features), fits the 3,000 trees as five forests of 600, and uses default forest settings.
-- **One seed on the held-out participants.** Three seeds were run on cross-validation only; the spread there is about 0.01.
-- **Pretrained against from scratch.** The paper's CNN + HMM was trained from scratch, while Deep + HMM and Context start from a pretrained encoder, so part of the gap to the paper's deep model is pretraining. The new part here is the context model and the ablation that separates the encoder from the context.
-- **One fine-tuning recipe.** "Frozen beats fine-tuned" is about learning rate 1e-4 with early stopping after one or two epochs; a gentler schedule was not tried.
-- **The transition matrix is an accident of the labels.** It helps here, on labels made the same way; it may not on continuously labelled data.
-- **One cohort, one device.** All 151 participants were recruited around Oxford and wore an Axivity AX3; the encoder was pretrained on UK Biobank, which used the same device.
+Writes a timeline CSV and a plot of the day from a raw recording (100 Hz, in g, columns `time, x, y, z`) using the Context model in `models/context_v1.pt`. `--rule balanced` trades some agreement for more of the rare activities. It has only been validated on CAPTURE-24's device (Axivity AX3, wrist, ±8 g). The model file is in Git LFS, so clone with Git LFS installed or run `git lfs pull`. The first run downloads the encoder.
 
 ## Reproduce
 
-Tested with Python 3.13 on a machine with 16 GB of memory, 8 logical cores and an RTX 2070 SUPER (8 GB).
+Tested with Python 3.13, 16 GB of memory, 8 cores and an RTX 2070 SUPER.
 
 1. Download `capture24.zip` (6.9 GB) from <https://doi.org/10.5287/bodleian:NGx0JOMP5> into `data/`.
-2. Install and register the kernel both notebooks ask for:
-   ```
-   pip install -r requirements.txt
-   python -m ipykernel install --user --name capture24
-   ```
-   The versions are pinned on purpose: the rerun of the paper's pipeline relies on how imbalanced-learn 0.13.0 and scikit-learn 1.6.1 compute out-of-bag output. PyTorch 2.14.1 comes with CUDA 12.6.
-3. Part 1, CPU only: `jupyter nbconvert --execute --to notebook --inplace capture24_har.ipynb`. Check: the window-count table near the top should read 922,199 in both columns. A run takes about 11 min once the caches in `data/` exist; the first run also builds the feature cache (9 min) and the rerun of the paper's pipeline (18 min).
-4. Part 2, with a GPU: `jupyter nbconvert --execute --to notebook --inplace capture24_new_model.ipynb`. Every fit is cached in `data/fits/` under a name that ends in a hash of its settings, so a changed setting always refits. The first run resamples the data to 30 Hz, computes the encoder's output for every window and fits 16 fine-tuned encoders (about 9 min each) and 61 recurrent networks (3-5 min each). After that a run takes about 10 min.
-5. The command-line tool, after part 2 has run (it reads part 2's caches), from the repository root: `python scripts/train_context.py` refits and saves the Context model (a few minutes), then `python scripts/predict.py`.
+2. `pip install -r requirements.txt` and `python -m ipykernel install --user --name capture24`. Versions are pinned because the paper's pipeline depends on how imbalanced-learn 0.13.0 and scikit-learn 1.6.1 compute out-of-bag output.
+3. Part 1 (CPU): `jupyter nbconvert --execute --to notebook --inplace capture24_har.ipynb`. About 11 min with caches; the first run adds about 27 min.
+4. Part 2 (GPU): the same command on `capture24_new_model.ipynb`. Fits are cached in `data/fits/`; with the cache it takes about 10 min, and from scratch it trains 16 fine-tuned encoders (about 9 min each) and 61 recurrent networks (3-5 min each).
+5. From the repository root, after part 2: `python scripts/train_context.py` refits the shipped model.
 
-## Files
-
-- `capture24_har.ipynb`, `capture24_new_model.ipynb`: the two notebooks.
-- `scripts/`: `features.py` (windows and features), `har.py` (folds, forest, HMM, metrics, bootstraps), `deep.py` (encoder, fine-tuning, context model), and the command-line tool, `train_context.py` and `predict.py`, which uses `models/context_v1.pt`.
-- `outputs/results.json`, `outputs/results_new_model.json`: every score, for part 1 and part 2.
-- `ruff.toml`: lint settings.
+Code is in `scripts/`: `features.py` (windows and features), `har.py` (folds, forest, HMM, metrics, bootstraps), `deep.py` (encoder and networks), and `train_context.py` / `predict.py`. Every score is saved in `outputs/results.json` and `outputs/results_new_model.json`.
 
 ## Licence
 
-- The code is under the MIT licence, in [`LICENSE`](LICENSE).
-- The CAPTURE-24 data is CC BY 4.0; credit Chan et al. (2024). It is not included here.
-- The `ssl-wearables` encoder is under the University of Oxford's Academic Use Licence (non-commercial academic research; no redistribution). It is not included here: the code downloads it from its authors, pinned to a commit. Because the Context model and `predict.py` depend on it, they are for non-commercial use only.
+The code is MIT. CAPTURE-24 is CC BY 4.0 (Chan et al., 2024) and is not included. The `ssl-wearables` encoder is under the University of Oxford's Academic Use Licence (non-commercial, no redistribution); it is not included and is downloaded from its authors at a pinned commit. Because the Context model and `predict.py` depend on it, they are for non-commercial use only.
