@@ -114,7 +114,6 @@ Tested with Python 3.13 on a machine with 16 GB of memory, 8 logical cores and a
 - `capture24_har.ipynb`, `capture24_new_model.ipynb`: the two notebooks.
 - `scripts/`: `features.py` (windows and features), `har.py` (folds, forest, HMM, metrics, bootstraps), `deep.py` (encoder, fine-tuning, context model), and the command-line tool, `train_context.py` and `predict.py`, which uses `models/context_v1.pt`.
 - `outputs/results.json`, `outputs/results_new_model.json`: every score, for part 1 and part 2.
-- `outputs/holdout_predictions.csv`, `outputs/holdout_proba.npy`: B's predictions for every labelled held-out window. `y_pred` is the most likely sequence; the probability columns are the HMM's per-window posterior, so their largest value can differ from `y_pred` (it agrees for 98.7% of windows).
 
 ## Licence
 

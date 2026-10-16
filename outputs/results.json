@@ -10,7 +10,6 @@
       "10-class": "WillettsSpecific2018",
       "4-class": "Walmsley2020"
     },
-    "saved_model": "B",
     "proba_columns": [
       "bicycling",
       "household-chores",
