@@ -12,12 +12,10 @@ Held-out participants, with 95% bootstrap intervals over participants. Macro-F1 
 
 | Model | Macro-F1 | κ |
 |---|---|---|
-| Paper's random forest + HMM, rerun here | 0.535 [0.490, 0.566] | 0.660 [0.630, 0.692] |
+| Paper's CNN + HMM, as published (trained from scratch) | 0.576 | 0.735 |
 | B: my random forest + HMM | 0.566 [0.524, 0.595] | 0.690 [0.653, 0.725] |
-| Deep + HMM: encoder fine-tuned, + HMM | 0.619 [0.557, 0.659] | 0.742 [0.702, 0.778] |
 | **Context: encoder frozen, + bidirectional GRU** | **0.642 [0.577, 0.677]** | **0.790 [0.758, 0.819]** |
 | Context minus B, paired by participant | +0.076 [0.021, 0.111] | +0.100 [0.076, 0.124] |
-| Paper's CNN + HMM, as published (trained from scratch) | 0.576 | 0.735 |
 
 ![Held-out scores](outputs/results_new_model.png)
 
@@ -44,7 +42,7 @@ Cross-validation is grouped by participant. Each new model's settings and select
 
 ## Limitations
 
-- The held-out participants have been scored five times over the project (B twice, the rerun, Deep + HMM, Context). Everything in between was chosen on cross-validation.
+- The held-out participants have been scored five times over the project (B twice, the rerun of the paper's pipeline, the fine-tuned encoder, Context). Everything in between was chosen on cross-validation.
 - Held-out macro-F1 leans on activities few participants did (8 did sports). The cross-validation figures, 0.52 for B and 0.58 for Context, are safer to quote.
 - Labelled windows almost never sit on a change of activity, so every score describes the inside of bouts.
 - One fine-tuning recipe was tried, one seed was scored on the held-out set, and all the data is from one UK cohort wearing one device.

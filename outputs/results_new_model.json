@@ -25,7 +25,7 @@
       "windows_per_batch": 16384,
       "patience": 5
     },
-    "chosen_context": "frozen encoder, 64 windows of context"
+    "chosen_context": "Context"
   },
   "error_by_distance_cv": {
     "0-10 s": {
@@ -67,9 +67,7 @@
       "macro-F1, spread over seeds": null,
       "\u03ba, spread over seeds": null,
       "macro-F1 against B": null,
-      "\u03ba against B": null,
-      "macro-F1 against Deep + HMM": null,
-      "\u03ba against Deep + HMM": null
+      "\u03ba against B": null
     },
     "Deep + HMM": {
       "macro-F1": 0.5781561349,
@@ -78,243 +76,145 @@
       "macro-F1, spread over seeds": 0.0078994348,
       "\u03ba, spread over seeds": 0.0102405103,
       "macro-F1 against B": "+0.056 \u00b1 0.018",
-      "\u03ba against B": "+0.033 \u00b1 0.003",
-      "macro-F1 against Deep + HMM": null,
-      "\u03ba against Deep + HMM": null
+      "\u03ba against B": "+0.033 \u00b1 0.003"
     },
-    "frozen encoder, single windows": {
-      "macro-F1": 0.4879457394,
-      "\u03ba": 0.6679768207,
-      "error rate 1-5 min from a change": 0.3295074962,
-      "macro-F1, spread over seeds": 0.0021583903,
-      "\u03ba, spread over seeds": 0.0002514056,
-      "macro-F1 against B": "-0.034 \u00b1 0.017",
-      "\u03ba against B": "-0.040 \u00b1 0.014",
-      "macro-F1 against Deep + HMM": "-0.090 \u00b1 0.012",
-      "\u03ba against Deep + HMM": "-0.073 \u00b1 0.015"
-    },
-    "frozen encoder, single windows + HMM": {
+    "Single windows + HMM": {
       "macro-F1": 0.6030888347,
       "\u03ba": 0.776301127,
       "error rate 1-5 min from a change": 0.2499380414,
       "macro-F1, spread over seeds": 0.0029240066,
       "\u03ba, spread over seeds": 0.0023470794,
       "macro-F1 against B": "+0.081 \u00b1 0.029",
-      "\u03ba against B": "+0.068 \u00b1 0.014",
-      "macro-F1 against Deep + HMM": "+0.025 \u00b1 0.016",
-      "\u03ba against Deep + HMM": "+0.035 \u00b1 0.014"
+      "\u03ba against B": "+0.068 \u00b1 0.014"
     },
-    "frozen encoder, 64 windows of context": {
+    "Context": {
       "macro-F1": 0.5801321657,
       "\u03ba": 0.8136106169,
       "error rate 1-5 min from a change": 0.209055717,
       "macro-F1, spread over seeds": 0.0109027727,
       "\u03ba, spread over seeds": 0.0010799365,
       "macro-F1 against B": "+0.058 \u00b1 0.028",
-      "\u03ba against B": "+0.105 \u00b1 0.014",
-      "macro-F1 against Deep + HMM": "+0.002 \u00b1 0.016",
-      "\u03ba against Deep + HMM": "+0.072 \u00b1 0.014"
+      "\u03ba against B": "+0.105 \u00b1 0.014"
     },
-    "frozen encoder, 64 windows of context + HMM": {
+    "Context + HMM": {
       "macro-F1": 0.5841803841,
       "\u03ba": 0.766445459,
       "error rate 1-5 min from a change": 0.2837212118,
       "macro-F1, spread over seeds": 0.0073767935,
       "\u03ba, spread over seeds": 0.0111046543,
       "macro-F1 against B": "+0.062 \u00b1 0.024",
-      "\u03ba against B": "+0.058 \u00b1 0.013",
-      "macro-F1 against Deep + HMM": "+0.006 \u00b1 0.009",
-      "\u03ba against Deep + HMM": "+0.025 \u00b1 0.012"
+      "\u03ba against B": "+0.058 \u00b1 0.013"
     }
   },
   "decision_rule_cv": {
     "B": {
       "0.0": {
         "macro-F1": 0.3913528657,
-        "\u03ba": 0.6831942775,
-        "F1 for manual work": 0.0
+        "\u03ba": 0.6831942775
       },
       "0.25": {
         "macro-F1": 0.4236728364,
-        "\u03ba": 0.7102480883,
-        "F1 for manual work": 0.0
+        "\u03ba": 0.7102480883
       },
       "0.5": {
         "macro-F1": 0.4451583481,
-        "\u03ba": 0.7322942013,
-        "F1 for manual work": 0.0
+        "\u03ba": 0.7322942013
       },
       "0.75": {
         "macro-F1": 0.4852141865,
-        "\u03ba": 0.7493406352,
-        "F1 for manual work": 0.0
+        "\u03ba": 0.7493406352
       },
       "1.0": {
         "macro-F1": 0.5217167639,
-        "\u03ba": 0.7084427065,
-        "F1 for manual work": 0.1464049856
-      }
-    },
-    "Deep + HMM": {
-      "0.0": {
-        "macro-F1": 0.5124570209,
-        "\u03ba": 0.7489646107,
-        "F1 for manual work": 0.0110603896
-      },
-      "0.25": {
-        "macro-F1": 0.5353922771,
-        "\u03ba": 0.763827716,
-        "F1 for manual work": 0.0180680881
-      },
-      "0.5": {
-        "macro-F1": 0.5661466649,
-        "\u03ba": 0.772215256,
-        "F1 for manual work": 0.0712167693
-      },
-      "0.75": {
-        "macro-F1": 0.581801379,
-        "\u03ba": 0.7679996226,
-        "F1 for manual work": 0.1016138059
-      },
-      "1.0": {
-        "macro-F1": 0.5781561349,
-        "\u03ba": 0.7412014683,
-        "F1 for manual work": 0.1287520918
+        "\u03ba": 0.7084427065
       }
     },
     "Single windows + HMM": {
       "0.0": {
         "macro-F1": 0.508335736,
-        "\u03ba": 0.7610169463,
-        "F1 for manual work": 0.0
+        "\u03ba": 0.7610169463
       },
       "0.25": {
         "macro-F1": 0.5298594808,
-        "\u03ba": 0.7776314833,
-        "F1 for manual work": 0.003758137
+        "\u03ba": 0.7776314833
       },
       "0.5": {
         "macro-F1": 0.5621187272,
-        "\u03ba": 0.788520555,
-        "F1 for manual work": 0.0406954915
+        "\u03ba": 0.788520555
       },
       "0.75": {
         "macro-F1": 0.5880003321,
-        "\u03ba": 0.793363953,
-        "F1 for manual work": 0.0402967962
+        "\u03ba": 0.793363953
       },
       "1.0": {
         "macro-F1": 0.6030888347,
-        "\u03ba": 0.776301127,
-        "F1 for manual work": 0.2413667004
+        "\u03ba": 0.776301127
       }
     },
     "Context": {
       "0.0": {
         "macro-F1": 0.5801321657,
-        "\u03ba": 0.8136106169,
-        "F1 for manual work": 0.0602085829
+        "\u03ba": 0.8136106169
       },
       "0.25": {
         "macro-F1": 0.5887822721,
-        "\u03ba": 0.8114299265,
-        "F1 for manual work": 0.0767460762
+        "\u03ba": 0.8114299265
       },
       "0.5": {
         "macro-F1": 0.5926125429,
-        "\u03ba": 0.8042248885,
-        "F1 for manual work": 0.0875443122
+        "\u03ba": 0.8042248885
       },
       "0.75": {
         "macro-F1": 0.5932860307,
-        "\u03ba": 0.7904678056,
-        "F1 for manual work": 0.1139931277
+        "\u03ba": 0.7904678056
       },
       "1.0": {
         "macro-F1": 0.5894815631,
-        "\u03ba": 0.7699498422,
-        "F1 for manual work": 0.139043803
-      }
-    },
-    "Context + HMM": {
-      "0.0": {
-        "macro-F1": 0.5681998395,
-        "\u03ba": 0.8060426826,
-        "F1 for manual work": 0.0656327299
-      },
-      "0.25": {
-        "macro-F1": 0.5754836982,
-        "\u03ba": 0.8043044276,
-        "F1 for manual work": 0.0730117748
-      },
-      "0.5": {
-        "macro-F1": 0.5823621373,
-        "\u03ba": 0.7988937217,
-        "F1 for manual work": 0.0856416961
-      },
-      "0.75": {
-        "macro-F1": 0.5837898926,
-        "\u03ba": 0.7853850857,
-        "F1 for manual work": 0.0886872485
-      },
-      "1.0": {
-        "macro-F1": 0.5841803841,
-        "\u03ba": 0.766445459,
-        "F1 for manual work": 0.1391334381
+        "\u03ba": 0.7699498422
       }
     },
     "Hand-made features, single windows + HMM": {
       "0.0": {
         "macro-F1": 0.3899461794,
-        "\u03ba": 0.6775521979,
-        "F1 for manual work": 0.0
+        "\u03ba": 0.6775521979
       },
       "0.25": {
         "macro-F1": 0.4154765555,
-        "\u03ba": 0.7021804946,
-        "F1 for manual work": 0.0
+        "\u03ba": 0.7021804946
       },
       "0.5": {
         "macro-F1": 0.4410096737,
-        "\u03ba": 0.719193934,
-        "F1 for manual work": 0.0
+        "\u03ba": 0.719193934
       },
       "0.75": {
         "macro-F1": 0.482743924,
-        "\u03ba": 0.7235006992,
-        "F1 for manual work": 0.0585363871
+        "\u03ba": 0.7235006992
       },
       "1.0": {
         "macro-F1": 0.4997200214,
-        "\u03ba": 0.6697706086,
-        "F1 for manual work": 0.1554155055
+        "\u03ba": 0.6697706086
       }
     },
     "Hand-made features, context": {
       "0.0": {
         "macro-F1": 0.5364607351,
-        "\u03ba": 0.7798487317,
-        "F1 for manual work": 0.0953367038
+        "\u03ba": 0.7798487317
       },
       "0.25": {
         "macro-F1": 0.5465202501,
-        "\u03ba": 0.7750279015,
-        "F1 for manual work": 0.1382961041
+        "\u03ba": 0.7750279015
       },
       "0.5": {
         "macro-F1": 0.546894478,
-        "\u03ba": 0.7637393761,
-        "F1 for manual work": 0.1617130336
+        "\u03ba": 0.7637393761
       },
       "0.75": {
         "macro-F1": 0.5442722536,
-        "\u03ba": 0.7454344369,
-        "F1 for manual work": 0.1651187126
+        "\u03ba": 0.7454344369
       },
       "1.0": {
         "macro-F1": 0.5345329571,
-        "\u03ba": 0.718348974,
-        "F1 for manual work": 0.1586784362
+        "\u03ba": 0.718348974
       }
     }
   },
@@ -324,12 +224,6 @@
       "macro-F1 there": 0.4852141865,
       "best macro-F1": 0.5217167639,
       "\u03ba there": 0.7084427065
-    },
-    "Deep + HMM": {
-      "best \u03ba": 0.772215256,
-      "macro-F1 there": 0.5661466649,
-      "best macro-F1": 0.581801379,
-      "\u03ba there": 0.7679996226
     },
     "Single windows + HMM": {
       "best \u03ba": 0.793363953,
@@ -342,12 +236,6 @@
       "macro-F1 there": 0.5801321657,
       "best macro-F1": 0.5932860307,
       "\u03ba there": 0.7904678056
-    },
-    "Context + HMM": {
-      "best \u03ba": 0.8060426826,
-      "macro-F1 there": 0.5681998395,
-      "best macro-F1": 0.5841803841,
-      "\u03ba there": 0.766445459
     },
     "Hand-made features, single windows + HMM": {
       "best \u03ba": 0.7235006992,
