@@ -115,22 +115,6 @@ def viterbi(lik, prior, trans, floor=TINY):
     return path
 
 
-def posterior(lik, prior, trans):
-    """P(state at t | all observations) by scaled forward-backward; rows sum to 1."""
-    lik, trans = lik + TINY, trans + TINY  # the floors Viterbi uses, so no path has probability zero
-    alpha, beta = np.empty_like(lik), np.ones_like(lik)
-    a = prior * lik[0]
-    alpha[0] = a / a.sum()
-    for t in range(1, len(lik)):
-        a = (alpha[t - 1] @ trans) * lik[t]
-        alpha[t] = a / a.sum()
-    for t in range(len(lik) - 2, -1, -1):
-        b = trans @ (lik[t + 1] * beta[t + 1])
-        beta[t] = b / b.sum()
-    gamma = alpha * beta
-    return gamma / gamma.sum(axis=1, keepdims=True)
-
-
 def sequence_ids(start, groups, keep=None):
     """Sequence id of each kept window (0 for the others): a new sequence at each participant and wherever kept
     windows are not 10 s apart. Windows must be sorted by participant, then time."""
@@ -153,10 +137,10 @@ def fit_hmm(y, seq, k):
     return {"prior": count / count.sum(), "trans": trans / trans.sum(axis=1, keepdims=True)}
 
 
-def smooth(lik, seq, hmm, decoder=viterbi, **kwargs):
-    """Apply `decoder` (viterbi or posterior) to each sequence on its own."""
+def smooth(lik, seq, hmm):
+    """Viterbi path of each sequence on its own."""
     edges = np.flatnonzero(np.r_[True, seq[1:] != seq[:-1], True])
-    return np.concatenate([decoder(lik[a:b], **hmm, **kwargs) for a, b in pairwise(edges)])
+    return np.concatenate([viterbi(lik[a:b], **hmm) for a, b in pairwise(edges)])
 
 
 def metrics_from_cm(cm):
