@@ -25,7 +25,6 @@
       "windows_per_batch": 16384,
       "patience": 5
     },
-    "chosen_fine_tuned": "natural \u00f7 prior, B's transitions",
     "chosen_context": "frozen encoder, 64 windows of context"
   },
   "error_by_distance_cv": {
@@ -60,314 +59,70 @@
       "share of B's errors": 0.274272378
     }
   },
-  "fine_tuned_cv": {
+  "cv": {
     "B": {
-      "macro_f1": {
-        "mean": 0.5217167638662239,
-        "std": 0.03285966862963993
-      },
-      "kappa": {
-        "mean": 0.7084427064845833,
-        "std": 0.02503043776516976
-      }
-    },
-    "natural network alone": {
-      "macro_f1": {
-        "mean": 0.490172494779328,
-        "std": 0.029908712051106512
-      },
-      "kappa": {
-        "mean": 0.6576453784574087,
-        "std": 0.03197887399112086
-      }
-    },
-    "balanced network alone": {
-      "macro_f1": {
-        "mean": 0.45636027187280453,
-        "std": 0.016617885002841597
-      },
-      "kappa": {
-        "mean": 0.5772249440650045,
-        "std": 0.010494491946820542
-      }
-    },
-    "natural \u00f7 prior, B's transitions": {
-      "macro_f1": {
-        "mean": 0.5870939968698784,
-        "std": 0.0295471359122462
-      },
-      "kappa": {
-        "mean": 0.7429779953399311,
-        "std": 0.01963985137814354
-      }
-    },
-    "natural \u00f7 prior, transitions across gaps": {
-      "macro_f1": {
-        "mean": 0.5745499943068413,
-        "std": 0.024124668996399076
-      },
-      "kappa": {
-        "mean": 0.719661672364298,
-        "std": 0.018648294316581722
-      }
-    },
-    "balanced, B's transitions": {
-      "macro_f1": {
-        "mean": 0.5864128063851786,
-        "std": 0.027650125649959004
-      },
-      "kappa": {
-        "mean": 0.7588434830506664,
-        "std": 0.016758960450612558
-      }
-    },
-    "balanced, transitions across gaps": {
-      "macro_f1": {
-        "mean": 0.5738226274895898,
-        "std": 0.024034980396040153
-      },
-      "kappa": {
-        "mean": 0.7331144916362918,
-        "std": 0.01882367745425577
-      }
-    },
-    "natural, softmax as it is, B's transitions": {
-      "macro_f1": {
-        "mean": 0.5127221043669797,
-        "std": 0.05078707240661752
-      },
-      "kappa": {
-        "mean": 0.749095699820075,
-        "std": 0.042223239264878615
-      }
-    }
-  },
-  "floor_sweep_cv": {
-    "B, floor 0.0001": {
-      "macro-F1": 0.5253833905071218,
-      "\u03ba": 0.692341214012931,
-      "error rate 1-5 min from a change": 0.3491671059627504
-    },
-    "B, floor 1e-08": {
-      "macro-F1": 0.5290186120640168,
-      "\u03ba": 0.7018054434625633,
-      "error rate 1-5 min from a change": 0.3427952646520577
-    },
-    "B, floor 1e-12": {
-      "macro-F1": 0.5257388005970601,
-      "\u03ba": 0.707001539622662,
-      "error rate 1-5 min from a change": 0.341384198752466
-    },
-    "B, floor 1e-16": {
-      "macro-F1": 0.5217167638662239,
-      "\u03ba": 0.7084427064845833,
-      "error rate 1-5 min from a change": 0.34059958373565385
-    },
-    "B, floor 1e-24": {
-      "macro-F1": 0.5168358860116731,
-      "\u03ba": 0.7123549709610029,
-      "error rate 1-5 min from a change": 0.3394016572562119
-    },
-    "Deep + HMM, floor 0.0001": {
-      "macro-F1": 0.5726605662655403,
-      "\u03ba": 0.7199712524949258,
-      "error rate 1-5 min from a change": 0.3033082105031761
-    },
-    "Deep + HMM, floor 1e-08": {
-      "macro-F1": 0.577553175020966,
-      "\u03ba": 0.7307395444711794,
-      "error rate 1-5 min from a change": 0.2975537685407216
-    },
-    "Deep + HMM, floor 1e-12": {
-      "macro-F1": 0.5819997476007364,
-      "\u03ba": 0.7374628502070528,
-      "error rate 1-5 min from a change": 0.293274920758662
-    },
-    "Deep + HMM, floor 1e-16": {
-      "macro-F1": 0.5870939968698784,
-      "\u03ba": 0.7429779953399311,
-      "error rate 1-5 min from a change": 0.2910481042409577
-    },
-    "Deep + HMM, floor 1e-24": {
-      "macro-F1": 0.5849564177134994,
-      "\u03ba": 0.7488026768069698,
-      "error rate 1-5 min from a change": 0.2873663730658783
-    }
-  },
-  "rate_sweep_cv": {
-    "B, rate 0.1": {
-      "macro-F1": 0.5174575350619198,
-      "\u03ba": 0.6783511128957744,
-      "error rate 1-5 min from a change": 0.36282837083030184
-    },
-    "B, rate 0.01": {
-      "macro-F1": 0.5275302702787221,
-      "\u03ba": 0.6904822361714074,
-      "error rate 1-5 min from a change": 0.3511132734389334
-    },
-    "B, rate 0.001": {
-      "macro-F1": 0.5306145486581337,
-      "\u03ba": 0.696159839014217,
-      "error rate 1-5 min from a change": 0.344938417881964
-    },
-    "B, rate 0.0001": {
-      "macro-F1": 0.5295368662733608,
-      "\u03ba": 0.6966330557375195,
-      "error rate 1-5 min from a change": 0.3444765920387313
-    },
-    "B, rate 1e-05": {
-      "macro-F1": 0.5281631918217269,
-      "\u03ba": 0.697887826732877,
-      "error rate 1-5 min from a change": 0.34544268030112446
-    },
-    "B, rate 1e-06": {
-      "macro-F1": 0.5283516520479062,
-      "\u03ba": 0.6981840533903156,
-      "error rate 1-5 min from a change": 0.3463712240428829
-    },
-    "B, rate 1e-08": {
-      "macro-F1": 0.5242345208946382,
-      "\u03ba": 0.6965570854991591,
-      "error rate 1-5 min from a change": 0.3516701289760169
-    },
-    "B, rate 1e-10": {
-      "macro-F1": 0.5198810862333796,
-      "\u03ba": 0.6971325778014209,
-      "error rate 1-5 min from a change": 0.35466284214724364
-    },
-    "B, rate 1e-13": {
-      "macro-F1": 0.5113273064484927,
-      "\u03ba": 0.6918208580107837,
-      "error rate 1-5 min from a change": 0.3660648731408635
-    },
-    "B, rate 1e-16": {
-      "macro-F1": 0.5028852071860302,
-      "\u03ba": 0.6861364650460173,
-      "error rate 1-5 min from a change": 0.37675089311340365
-    },
-    "Deep + HMM, rate 0.1": {
-      "macro-F1": 0.5643413283559535,
-      "\u03ba": 0.7044754725605331,
-      "error rate 1-5 min from a change": 0.319270604813943
-    },
-    "Deep + HMM, rate 0.01": {
-      "macro-F1": 0.5723789231407309,
-      "\u03ba": 0.7167060795743677,
-      "error rate 1-5 min from a change": 0.3069235655079422
-    },
-    "Deep + HMM, rate 0.001": {
-      "macro-F1": 0.5761867703855873,
-      "\u03ba": 0.7226210402068448,
-      "error rate 1-5 min from a change": 0.3001820699887402
-    },
-    "Deep + HMM, rate 0.0001": {
-      "macro-F1": 0.5767030459212851,
-      "\u03ba": 0.7261249967570086,
-      "error rate 1-5 min from a change": 0.2981370474375796
-    },
-    "Deep + HMM, rate 1e-05": {
-      "macro-F1": 0.5764044516777582,
-      "\u03ba": 0.7275097353052635,
-      "error rate 1-5 min from a change": 0.29762801257464966
-    },
-    "Deep + HMM, rate 1e-06": {
-      "macro-F1": 0.5750974267788528,
-      "\u03ba": 0.7284277719055792,
-      "error rate 1-5 min from a change": 0.29820346000870085
-    },
-    "Deep + HMM, rate 1e-08": {
-      "macro-F1": 0.5750048558564662,
-      "\u03ba": 0.7288811060994191,
-      "error rate 1-5 min from a change": 0.29973734136500524
-    },
-    "Deep + HMM, rate 1e-10": {
-      "macro-F1": 0.5736026833878174,
-      "\u03ba": 0.728587598286005,
-      "error rate 1-5 min from a change": 0.30361833047125586
-    },
-    "Deep + HMM, rate 1e-13": {
-      "macro-F1": 0.5770982463460607,
-      "\u03ba": 0.7305373915037047,
-      "error rate 1-5 min from a change": 0.3048021262170295
-    },
-    "Deep + HMM, rate 1e-16": {
-      "macro-F1": 0.5721297824441078,
-      "\u03ba": 0.728520660871955,
-      "error rate 1-5 min from a change": 0.311302648820842
-    }
-  },
-  "fine_tuned_seeds_cv": {
-    "42": {
-      "macro-F1": 0.5870939968698784,
-      "\u03ba": 0.7429779953399311
-    },
-    "43": {
-      "macro-F1": 0.5721101694015882,
-      "\u03ba": 0.7504374833378626
-    },
-    "44": {
-      "macro-F1": 0.5752642385408084,
-      "\u03ba": 0.73018892627209
-    }
-  },
-  "context_cv": {
-    "B": {
-      "error rate 1-5 min from a change": 0.3405995837,
-      "\u03ba for P052": 0.3604858335,
       "macro-F1": 0.5217167639,
       "\u03ba": 0.7084427065,
+      "error rate 1-5 min from a change": 0.3405995837,
       "macro-F1, spread over seeds": null,
       "\u03ba, spread over seeds": null,
+      "macro-F1 against B": null,
+      "\u03ba against B": null,
       "macro-F1 against Deep + HMM": null,
       "\u03ba against Deep + HMM": null
     },
     "Deep + HMM": {
-      "error rate 1-5 min from a change": 0.2858902196,
-      "\u03ba for P052": 0.3648987007,
       "macro-F1": 0.5781561349,
       "\u03ba": 0.7412014683,
+      "error rate 1-5 min from a change": 0.2858902196,
       "macro-F1, spread over seeds": 0.0078994348,
       "\u03ba, spread over seeds": 0.0102405103,
+      "macro-F1 against B": "+0.056 \u00b1 0.018",
+      "\u03ba against B": "+0.033 \u00b1 0.003",
       "macro-F1 against Deep + HMM": null,
       "\u03ba against Deep + HMM": null
     },
     "frozen encoder, single windows": {
-      "error rate 1-5 min from a change": 0.3295074962,
-      "\u03ba for P052": 0.3198146955,
       "macro-F1": 0.4879457394,
       "\u03ba": 0.6679768207,
+      "error rate 1-5 min from a change": 0.3295074962,
       "macro-F1, spread over seeds": 0.0021583903,
       "\u03ba, spread over seeds": 0.0002514056,
+      "macro-F1 against B": "-0.034 \u00b1 0.017",
+      "\u03ba against B": "-0.040 \u00b1 0.014",
       "macro-F1 against Deep + HMM": "-0.090 \u00b1 0.012",
       "\u03ba against Deep + HMM": "-0.073 \u00b1 0.015"
     },
     "frozen encoder, single windows + HMM": {
-      "error rate 1-5 min from a change": 0.2499380414,
-      "\u03ba for P052": 0.3673729363,
       "macro-F1": 0.6030888347,
       "\u03ba": 0.776301127,
+      "error rate 1-5 min from a change": 0.2499380414,
       "macro-F1, spread over seeds": 0.0029240066,
       "\u03ba, spread over seeds": 0.0023470794,
+      "macro-F1 against B": "+0.081 \u00b1 0.029",
+      "\u03ba against B": "+0.068 \u00b1 0.014",
       "macro-F1 against Deep + HMM": "+0.025 \u00b1 0.016",
       "\u03ba against Deep + HMM": "+0.035 \u00b1 0.014"
     },
     "frozen encoder, 64 windows of context": {
-      "error rate 1-5 min from a change": 0.209055717,
-      "\u03ba for P052": 0.3879159786,
       "macro-F1": 0.5801321657,
       "\u03ba": 0.8136106169,
+      "error rate 1-5 min from a change": 0.209055717,
       "macro-F1, spread over seeds": 0.0109027727,
       "\u03ba, spread over seeds": 0.0010799365,
+      "macro-F1 against B": "+0.058 \u00b1 0.028",
+      "\u03ba against B": "+0.105 \u00b1 0.014",
       "macro-F1 against Deep + HMM": "+0.002 \u00b1 0.016",
       "\u03ba against Deep + HMM": "+0.072 \u00b1 0.014"
     },
     "frozen encoder, 64 windows of context + HMM": {
-      "error rate 1-5 min from a change": 0.2837212118,
-      "\u03ba for P052": 0.3562168809,
       "macro-F1": 0.5841803841,
       "\u03ba": 0.766445459,
+      "error rate 1-5 min from a change": 0.2837212118,
       "macro-F1, spread over seeds": 0.0073767935,
       "\u03ba, spread over seeds": 0.0111046543,
+      "macro-F1 against B": "+0.062 \u00b1 0.024",
+      "\u03ba against B": "+0.058 \u00b1 0.013",
       "macro-F1 against Deep + HMM": "+0.006 \u00b1 0.009",
       "\u03ba against Deep + HMM": "+0.025 \u00b1 0.012"
     }
@@ -624,22 +379,6 @@
         ]
       }
     },
-    "Deep": {
-      "macro_f1": {
-        "value": 0.5128023542094172,
-        "ci": [
-          0.4656979698476767,
-          0.5464343000626011
-        ]
-      },
-      "kappa": {
-        "value": 0.6495642659042684,
-        "ci": [
-          0.6196622935205252,
-          0.6787878084567142
-        ]
-      }
-    },
     "Deep + HMM": {
       "macro_f1": {
         "value": 0.6194883087587584,
@@ -690,22 +429,6 @@
         ]
       }
     },
-    "Context minus Deep + HMM": {
-      "macro_f1": {
-        "value": 0.022363919618063832,
-        "ci": [
-          -0.025255211890948627,
-          0.05668120042418921
-        ]
-      },
-      "kappa": {
-        "value": 0.047987816393972205,
-        "ci": [
-          0.026496470932061193,
-          0.07106174294212401
-        ]
-      }
-    },
     "Context minus B": {
       "macro_f1": {
         "value": 0.07569296414836868,
@@ -719,6 +442,22 @@
         "ci": [
           0.0764108937839596,
           0.12441931879327857
+        ]
+      }
+    },
+    "Context minus Deep + HMM": {
+      "macro_f1": {
+        "value": 0.022363919618063832,
+        "ci": [
+          -0.025255211890948627,
+          0.05668120042418921
+        ]
+      },
+      "kappa": {
+        "value": 0.047987816393972205,
+        "ci": [
+          0.026496470932061193,
+          0.07106174294212401
         ]
       }
     }
@@ -735,18 +474,6 @@
       "standing": 0.29954325448224145,
       "vehicle": 0.732711812314312,
       "walking": 0.4262765905661296
-    },
-    "Deep": {
-      "bicycling": 0.7356407857811038,
-      "household-chores": 0.506065511521474,
-      "manual-work": 0.06491733656908842,
-      "mixed-activity": 0.24173267105204277,
-      "sitting": 0.7971571515406556,
-      "sleep": 0.9223244191610399,
-      "sports": 0.4761642325709562,
-      "standing": 0.15209776601541217,
-      "vehicle": 0.7928500703528063,
-      "walking": 0.4390735975295934
     },
     "Deep + HMM": {
       "bicycling": 0.7755319148936171,

@@ -98,20 +98,17 @@ def early_stopping(model, train_one_epoch, validation_loss, patience, max_epochs
     return model
 
 
-def fine_tune(X, y, train, val, balanced, seed, lr, batch, patience):
-    """Fine-tune every layer of the encoder on rows `train`, stopping early on rows `val`. With `balanced`, every
-    batch draws the classes equally often and the validation loss weights them equally."""
+def fine_tune(X, y, train, val, seed, lr, batch, patience):
+    """Fine-tune every layer of the encoder on rows `train`, stopping early on rows `val`."""
     k = int(y[train].max()) + 1
-    count = np.bincount(y[train], minlength=k)
     torch.manual_seed(seed)
     rng = np.random.default_rng(seed)
     model = load_encoder(k)
     optimizer = torch.optim.Adam(model.parameters(), lr=lr, amsgrad=True)
     scaler = torch.amp.GradScaler(enabled=HALF)
-    class_weight = torch.tensor(count.sum() / (k * count), dtype=torch.float32) if balanced else None
 
     def train_one_epoch():
-        order = rng.choice(train, len(train), p=(1 / count)[y[train]] / k) if balanced else rng.permutation(train)
+        order = rng.permutation(train)
         for idx, xb in batches(X, order[:len(order) // batch * batch], batch):
             with torch.autocast(DEVICE, dtype=torch.float16, enabled=HALF):
                 loss = cross_entropy(model(xb), torch.from_numpy(y[idx]).long().to(DEVICE))
@@ -121,7 +118,7 @@ def fine_tune(X, y, train, val, balanced, seed, lr, batch, patience):
             scaler.update()
 
     def validation_loss():
-        return cross_entropy(encoder_logits(model, X, val), torch.from_numpy(y[val]).long(), weight=class_weight).item()
+        return cross_entropy(encoder_logits(model, X, val), torch.from_numpy(y[val]).long()).item()
 
     return early_stopping(model, train_one_epoch, validation_loss, patience, max_epochs=50)
 
@@ -201,22 +198,3 @@ def fit_context(E, y, seq, train, val, length, seed, hidden, lr, windows_per_bat
         return cross_entropy(context_logits(model, E, seq, val, length), torch.from_numpy(y[val]).long(), ignore_index=-1).item()
 
     return early_stopping(model, train_one_epoch, validation_loss, patience, max_epochs=100)
-
-
-def chunked_proba(model, E, seq, rows, length):
-    """context_proba, but reading overlapping chunks of `length` windows (a new one every length // 2) and averaging
-    the softmax where they overlap: what the model sees in training, as a check on reading whole recordings."""
-    model.eval()
-    out = []
-    with torch.no_grad():
-        for a, b in runs(seq, rows):
-            n = b - a
-            starts = np.unique(np.r_[np.arange(0, n - length + 1, length // 2), n - length]) if n > length else np.array([0])
-            total, count = np.zeros((n, model.out.out_features)), np.zeros((n, 1))
-            for i in range(0, len(starts), 512):
-                idx = starts[i:i + 512, None] + np.arange(min(length, n))
-                p = torch.softmax(model(torch.from_numpy(E[a + idx]).to(DEVICE, torch.float32)), dim=2).cpu().numpy()
-                np.add.at(total, idx, p)
-                np.add.at(count, idx, 1)
-            out.append(total / count)
-    return np.concatenate(out)
