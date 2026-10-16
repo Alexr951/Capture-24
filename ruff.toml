@@ -5,4 +5,4 @@ select = ["E", "F", "W", "I", "B", "UP", "SIM", "C4", "PIE", "RUF"]
 ignore = ["B905", "E731", "RUF001", "RUF002", "RUF003", "B023"]
 
 [lint.isort]
-known-first-party = ["deep", "features", "har"]
+known-first-party = ["capture24"]

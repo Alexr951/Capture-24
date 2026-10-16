@@ -1,4 +1,4 @@
-# Windowing and window features for CAPTURE-24. A module because joblib workers import it and later rounds reuse it.
+# Windowing and window features for CAPTURE-24. A module because joblib workers import it.
 # Feature set follows https://github.com/OxWearables/capture24/blob/master/feature-list.md (own implementation)
 # without the third dominant frequency, plus per-axis means/stds and inter-axis correlations.
 import numpy as np

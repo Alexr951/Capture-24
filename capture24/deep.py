@@ -9,7 +9,7 @@ from joblib import Parallel, delayed
 from scipy.interpolate import interp1d
 from torch.nn.functional import cross_entropy
 
-import features as F
+from . import features as F
 
 # harnet10, a ResNet for 10 s windows at 30 Hz in g, shape (3, 300). The commit pins the code and the weights,
 # which ship inside the repository.
@@ -21,10 +21,10 @@ HALF = DEVICE == "cuda"  # mixed precision on the GPU only
 
 EMBEDDINGS = Path("data") / f"embeddings_w{F.WINSEC}s_v{F.FEATURE_VERSION}_{REPO.split(':')[1][:8]}.npy"
 
-# The training settings of capture24_new_model.ipynb and train_context.py, fixed before any score was seen.
+# The training settings of part 2, fixed before any score was seen.
 FINE_TUNING = {"lr": 1e-4, "batch": 1000, "patience": 5}
 CONTEXT = {"hidden": 128, "lr": 1e-3, "windows_per_batch": 16384, "patience": 5}
-CONTEXT_LENGTH = 64  # the chunk length the shipped context model trains on, about 10 min
+CONTEXT_LENGTH = 64  # the chunk length the context model trains on, about 10 min
 
 
 def load_encoder(n_classes):

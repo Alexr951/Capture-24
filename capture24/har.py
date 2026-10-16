@@ -1,4 +1,4 @@
-# Shared by both notebooks and predict.py: folds, the forest, the HMM, metrics, bootstraps and the activity band plot.
+# Shared by both notebooks: folds, the forest, the HMM, metrics, bootstraps and the activity band plot.
 from itertools import pairwise
 
 import matplotlib.pyplot as plt
@@ -8,7 +8,7 @@ from imblearn.ensemble import BalancedRandomForestClassifier
 from matplotlib.patches import Patch
 from sklearn.model_selection import GroupShuffleSplit, StratifiedGroupKFold
 
-import features as F
+from . import features as F
 
 CLASSES = ["sleep", "sitting", "standing", "household-chores", "manual-work",
            "walking", "mixed-activity", "vehicle", "sports", "bicycling"]  # the 10 activities, display order
