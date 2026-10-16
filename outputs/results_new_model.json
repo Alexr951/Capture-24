@@ -382,6 +382,11 @@
       }
     }
   },
+  "holdout_participants_ahead_on_kappa": {
+    "B": 46,
+    "Deep + HMM": 39,
+    "Single windows + HMM": 42
+  },
   "holdout_per_class_f1": {
     "B": {
       "bicycling": 0.8101694915254237,
