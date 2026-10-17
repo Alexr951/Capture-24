@@ -59,4 +59,4 @@ The code is in the `capture24` package (`from capture24 import har`): `features.
 
 ## Licence
 
-The code is MIT. CAPTURE-24 is CC BY 4.0 (Chan et al., 2024) and is not included. The `ssl-wearables` encoder is under the University of Oxford's Academic Use Licence (non-commercial, no redistribution); it is not included and is downloaded from its authors at a pinned commit.
+The code is MIT. The paper, `paper.pdf`, is [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). CAPTURE-24 is CC BY 4.0 (Chan et al., 2024) and is not included. The `ssl-wearables` encoder is under the University of Oxford's Academic Use Licence (non-commercial, no redistribution); it is not included and is downloaded from its authors at a pinned commit.
