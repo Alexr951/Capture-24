@@ -4,7 +4,9 @@ A frozen self-supervised encoder with about 10 minutes of temporal context reach
 
 Human activity recognition on [CAPTURE-24](https://doi.org/10.5287/bodleian:NGx0JOMP5): 151 people who wore a wrist accelerometer for a day, labelled with 10 activities (sleep, sitting, standing, household chores, manual work, walking, mixed activity, vehicle, sports, bicycling) from camera photos taken every 20 to 40 seconds. The task is to label every 10 s window. The last 51 participants are held out, as in the dataset paper ([Chan et al., 2024](https://doi.org/10.1038/s41597-024-03960-3)).
 
-I first reproduced the paper's random forest + HMM, then built a model that uses a self-supervised encoder and reads about 10 minutes of context at a time. It reaches κ 0.790 on the held-out participants. The paper's best model reaches 0.735.
+I first reproduced the paper's random forest + HMM, then built a model that uses a self-supervised encoder and reads about 10 minutes of context at a time. It reaches κ 0.790 on the held-out participants. The dataset paper's best model reaches 0.735.
+
+The write-up is [`paper.pdf`](paper.pdf), *Frozen self-supervised features and temporal context for free-living activity recognition on CAPTURE-24*.
 
 ![Camera labels, a random forest and the forest smoothed by an HMM over six hours of one participant](outputs/bands.png)
 
