@@ -1,6 +1,7 @@
-# Shared by both notebooks: folds, the forest, the HMM, metrics, bootstraps and the activity band plot.
+# Shared by both notebooks: folds, the forest, the HMM, metrics, bootstraps and the shared plots.
 from itertools import pairwise
 
+import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -41,6 +42,32 @@ def draw_band(ax, start, codes, name):
 def class_legend(fig):
     fig.legend(handles=[Patch(color=c, label=n) for n, c in CLASS_COLORS.items()],
                loc="outside lower center", ncols=10, handlelength=1, columnspacing=1)
+
+
+def plot_bands(start, groups, bands, pid="P101", first_hour=8, hours=6):
+    """Rows of activity bands (name -> codes, one per window) for `hours` of participant `pid`, from `first_hour` on
+    their first day. `start`, `groups` and the codes cover the same windows."""
+    begin = start[groups == pid].min().astype("datetime64[D]") + np.timedelta64(first_hour, "h")
+    shown = (groups == pid) & (start >= begin) & (start < begin + np.timedelta64(hours, "h"))
+    fig, axes = plt.subplots(len(bands), 1, sharex=True, figsize=(12, 0.6 + 0.65 * len(bands)), layout="constrained")
+    for ax, (name, codes) in zip(axes, bands.items()):
+        draw_band(ax, start[shown], codes[shown], name)
+    axes[-1].xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
+    class_legend(fig)
+    return fig
+
+
+def save_for_paper(fig, path):
+    """Save `fig` for the paper, without the titles its caption replaces and on white, then close it."""
+    if fig._suptitle is not None:
+        fig._suptitle.remove()
+        fig._suptitle = None
+    fig.set_facecolor("white")
+    for ax in fig.axes:
+        ax.set_title("")
+        ax.set_facecolor("white")
+    fig.savefig(path, dpi=150)
+    plt.close(fig)
 
 
 def label_bars(ax, values, whiskers, fmt):
